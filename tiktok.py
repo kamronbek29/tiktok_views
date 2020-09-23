@@ -71,5 +71,6 @@ async def get_video_url(link):
 
 
 if __name__ == '__main__':
-    asyncio.run(get_video_url('https://vm.tiktok.com/ZSmSPrFb/'))
+    video_url = input('Paste video url here: ')
+    asyncio.run(get_video_url(video_url))
 
