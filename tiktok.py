@@ -66,7 +66,7 @@ async def get_video_url(link):
             async with session.post(REQUEST_URL, data=data, headers=headers) as response:
                 response_json = await response.json()
                 if response_json['status_code'] == 0:
-                    if i % 10 == 0:
+                    if i % 10 == 0 and i != 0:
                         print(f'Made {i} successful shares')
 
 
