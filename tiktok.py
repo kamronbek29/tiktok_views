@@ -11,8 +11,12 @@ REQUEST_URL = 'https://api16-core-c-useast1a.tiktokv.com/aweme/v1/aweme/stats/'
 async def get_video_id(link):
     async with aiohttp.ClientSession() as session:
         async with session.get(link, allow_redirects=True) as response:
-            correct_url = response.url
-            video_id = str(correct_url).split('com/v/')[1].split('.html?')[0]
+            correct_url = str(response.url)
+
+            if 'com/v/' in correct_url:
+                video_id = correct_url.split('v/')[1].split('.')[0]
+            else:
+                video_id = correct_url.split('video/')[1].split('?')[0]
 
             return video_id
 
