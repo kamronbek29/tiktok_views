@@ -1,6 +1,4 @@
-
 import asyncio
-import random
 
 import aiohttp
 import time
@@ -21,24 +19,12 @@ async def get_video_id(link):
             return video_id
 
 
-# Get random ids for device id and iid
-async def random_with_n_digits():
-    range_start = 10 ** 18
-    range_end = (10 ** 19) - 1
-
-    first_id = str(random.randint(range_start, range_end))
-    second_id = str(random.randint(range_start, range_end))
-
-    return first_id, second_id
-
-
 async def get_video_params(video_id):
-    first_id, second_id = await random_with_n_digits()
     action_time = str(time.time())
 
     headers = {
         'Content-Type': 'application/x-www-form-urlencoded',
-        'User-Agent': 'TikTok 16.3.5 rv:198454 (iPhone; iOS 13.1; sv_SE) Cronet',
+        'User-Agent': 'TikTok 12.5.8 nv:198454 (Android; SDS 32.3; en_EN) Musical',
     }
 
     data = {
@@ -47,14 +33,14 @@ async def get_video_params(video_id):
         'item_type': '1',
         'share_delta': '1',
         'stats_channel': 'copy',
-        'version_code': '16.6.5',
+        'version_code': '3.3.4',
         'app_name': 'musical_ly',
         'channel': 'App Store',
-        'device_id': first_id,
-        'iid': second_id,
+        'device_id': '7874600876274394189',
+        'iid': '1232256540021056640',
         'aid': '1233',
-        'os_version': '13.1.1',
-        'device_platform': 'iphone',
+        'os_version': '12.5.8',
+        'device_platform': 'Android',
         'device_type': 'iPhone10,5'
     }
 
@@ -67,7 +53,7 @@ async def get_video_url(link):
 
     for i in range(1000):
         async with aiohttp.ClientSession() as session:
-            async with session.post(REQUEST_URL, data=data, headers=headers) as response:
+            async with session.post(REQUEST_URL, params=data, headers=headers) as response:
                 response_json = await response.json()
                 if response_json['status_code'] == 0:
                     if i % 10 == 0 and i != 0:
