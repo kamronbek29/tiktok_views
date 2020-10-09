@@ -66,7 +66,6 @@ class TikTOkViews:
         else:
             if all(i not in response.text for i in ['Service Unavailable', 'Gateway Timeout']):
                 if response.status_code == 200:
-                    print(response.text)
                     self.added += 1
                 else:
                     self.lock.acquire()
