@@ -41,7 +41,7 @@ async def get_video_params(video_id):
         'aid': '1233',
         'os_version': '12.5.8',
         'device_platform': 'Android',
-        'device_type': 'iPhone10,5'
+        'device_type': 'Samsung10,5'
     }
 
     return headers, data
