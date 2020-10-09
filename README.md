@@ -5,7 +5,7 @@
 
 ### Requirements
 
-* aiohttp
+* requests
 
 ## License
 
