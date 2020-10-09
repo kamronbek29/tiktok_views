@@ -1,66 +1,93 @@
-import asyncio
-
-import aiohttp
-import time
-
-REQUEST_URL = 'https://api16-core-c-useast1a.tiktokv.com/aweme/v1/aweme/stats/'
+import random
+import requests
+import threading
+from time import time, sleep
 
 
-async def get_video_id(link):
-    async with aiohttp.ClientSession() as session:
-        async with session.get(link, allow_redirects=True) as response:
-            correct_url = str(response.url)
+REQUEST_URL = 'https://api16-core-c-useast1a.tiktokv.com/aweme/v1/aweme/stats/?ac=WIFI&op_region=SE&app_skin=white&'
 
-            if 'com/v/' in correct_url:
-                video_id = correct_url.split('v/')[1].split('.')[0]
+
+def get_video_id(video_url):
+    response = requests.get(video_url)
+    correct_url = str(response.url)
+
+    if 'com/v/' in correct_url:
+        video_id = correct_url.split('v/')[1].split('.')[0]
+    else:
+        video_id = correct_url.split('video/')[1].split('?')[0]
+
+    return video_id
+
+
+class TikTOkViews:
+    def __init__(self):
+        self.start_time = time()
+        self.added = 0
+        self.lock = threading.Lock()
+        self.amount = int(input('How many shares do you want? '))
+        self.video_id = get_video_id(input('Paste tiktok video url: '))
+
+    def update_title(self):
+        while self.added == 0:
+            sleep(0.2)
+
+        while self.added < self.amount:
+            print('Added: {0}/{1}'.format(self.added, self.amount))
+            sleep(0.2)
+
+        print('Added: {0}/{1}'.format(self.added, self.amount))
+
+    def main(self):
+        action_time = round(time())
+        device_id = str(random.randint(1000000000000000000, 9999999999999999999))
+
+        data = {
+            'action_time': action_time,
+            'item_id': self.video_id,
+            'item_type': 1,
+            'share_delta': 1,
+            'stats_channel': 'copy'
+        }
+
+        headers = {
+            'Content-Type': 'application/x-www-form-urlencoded',
+            'User-Agent': 'TikTok 16.6.5 rv:166515 (iPhone; iOS 13.6; en_US) Cronet',
+            'x-common-params-v2': f'version_code=16.6.5&app_name=musical_ly&channel=App%20Store&'
+                                  f'device_id={device_id}&aid=1233&os_version=13.5.1&'
+                                  f'device_platform=iphone&device_type=iPhone10,5',
+        }
+
+        try:
+            response = requests.post(REQUEST_URL, params=data, headers=headers)
+
+        except:
+            self.main()
+
+        else:
+            if all(i not in response.text for i in ['Service Unavailable', 'Gateway Timeout']):
+                if response.status_code == 200:
+                    print(response.text)
+                    self.added += 1
+                else:
+                    self.lock.acquire()
+                    print(f'Error: {response.text} | Status Code: {response.status_code}')
+                    self.lock.release()
+                    self.main()
             else:
-                video_id = correct_url.split('video/')[1].split('?')[0]
+                self.main()
 
-            return video_id
+    def start(self):
+        threading.Thread(target=self.update_title).start()
 
+        for _ in range(self.amount):
+            while True:
+                if threading.active_count() <= 300:
+                    threading.Thread(target=self.main).start()
+                    break
 
-async def get_video_params(video_id):
-    action_time = str(time.time())
-
-    headers = {
-        'Content-Type': 'application/x-www-form-urlencoded',
-        'User-Agent': 'TikTok 12.5.8 nv:198454 (Android; SDS 32.3; en_EN) Musical',
-    }
-
-    data = {
-        'action_time': action_time,
-        'item_id': video_id,
-        'item_type': '1',
-        'share_delta': '1',
-        'stats_channel': 'copy',
-        'version_code': '3.3.4',
-        'app_name': 'musical_ly',
-        'channel': 'App Store',
-        'device_id': '7874600876274394189',
-        'iid': '1232256540021056640',
-        'aid': '1233',
-        'os_version': '12.5.8',
-        'device_platform': 'Android',
-        'device_type': 'Samsung10,5'
-    }
-
-    return headers, data
-
-
-async def get_video_url(link):
-    video_id = await get_video_id(link)
-    headers, data = await get_video_params(video_id)
-
-    for i in range(1000):
-        async with aiohttp.ClientSession() as session:
-            async with session.post(REQUEST_URL, params=data, headers=headers) as response:
-                response_json = await response.json()
-                if response_json['status_code'] == 0:
-                    if i % 10 == 0 and i != 0:
-                        print(f'Made {i} successful shares')
+        sleep(3)
 
 
 if __name__ == '__main__':
-    video_url = input('Paste video url here: ')
-    asyncio.run(get_video_url(video_url))
-
+    tiktok_views = TikTOkViews()
+    tiktok_views.start()
